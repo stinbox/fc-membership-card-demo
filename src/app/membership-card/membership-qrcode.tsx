@@ -4,41 +4,48 @@ import * as QRCode from "qrcode";
 import { Suspense, use, useCallback, useEffect, useState } from "react";
 import { fetchMembershipToken } from "./fetch-membership-token";
 
+function toQRCodeSvgString(token: string): Promise<string> {
+  return QRCode.toString(token, {
+    errorCorrectionLevel: "H",
+    type: "svg",
+  });
+}
+
 export const QRCodeView: React.FC<{
   defaultToken: string;
 }> = ({ defaultToken }) => {
-  const defaultDataURLPromise = QRCode.toDataURL(defaultToken, {
-    errorCorrectionLevel: "H",
-    scale: 8,
-  });
+  const defaultSvgString = toQRCodeSvgString(defaultToken);
 
   return (
     <Suspense>
-      <QRCodeViewInner defaultDataURLPromise={defaultDataURLPromise} />
+      <QRCodeViewInner defaultSvgString={defaultSvgString} />
     </Suspense>
   );
 };
 
-const QRCodeViewInner: React.FC<{ defaultDataURLPromise: Promise<string> }> = ({
-  defaultDataURLPromise,
+const QRCodeViewInner: React.FC<{ defaultSvgString: Promise<string> }> = ({
+  defaultSvgString,
 }) => {
-  const [dataURL, setDataURL] = useState(use(defaultDataURLPromise));
+  const [svgString, setSvgString] = useState(use(defaultSvgString));
 
-  const resetDataURL = useCallback(async () => {
+  const resetSvgString = useCallback(async () => {
     const token = await fetchMembershipToken();
-    const dataURL = await QRCode.toDataURL(token, {
-      errorCorrectionLevel: "M",
-      scale: 8,
-    });
-    setDataURL(dataURL);
+    const svgString = await toQRCodeSvgString(token);
+    setSvgString(svgString);
   }, []);
 
   useEffect(() => {
     const timerId = setInterval(() => {
-      resetDataURL();
+      resetSvgString();
     }, 1000 * 55);
     return () => clearInterval(timerId);
-  }, [resetDataURL]);
+  }, [resetSvgString]);
 
-  return <img src={dataURL} alt="QRコード" />;
+  return (
+    <img
+      className="w-96"
+      src={`data:image/svg+xml;utf8,${encodeURIComponent(svgString)}`}
+      alt="QRコード"
+    />
+  );
 };
