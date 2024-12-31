@@ -8,7 +8,7 @@ const Page: React.FC = async () => {
   const session = await getSession();
 
   if (!session.id) {
-    redirect("/");
+    redirect("/userinfo");
   }
 
   const token = await generateMembershipToken(session);

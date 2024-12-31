@@ -1,8 +1,8 @@
 "use server";
 
 import * as v from "valibot";
-import { getSession } from "../lib/session";
 import { redirect } from "next/navigation";
+import { getSession } from "@/lib/session";
 
 const ValueSchema = v.object({
   name: v.string("氏名を入力してください"),

@@ -6,7 +6,7 @@ import { fetchMembershipToken } from "./fetch-membership-token";
 
 function toQRCodeSvgString(token: string): Promise<string> {
   return QRCode.toString(token, {
-    errorCorrectionLevel: "H",
+    errorCorrectionLevel: "L",
     type: "svg",
   });
 }
